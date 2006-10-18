@@ -1,8 +1,6 @@
-#titleFilter=法轮功 法轮大法 mmd nnd
+# poison mode
 titleFilter=cancelled fuck TEST test 法轮 卖 sell 求购 出售 出租 合租 CIS
-#严格控制的标题，任何标题中包含该字的均被过滤
-#title=test 测试 请问 请教 求助 help 求救 撒 妹妹 re hi 交流 任命 外校
+# normal mode
 title=？ hehe help 急问 请教 请问 问一下 问 求助 求
-#任何标题等于该值或者仅相差前后空格的被过滤
+# author mode
 #author=
-#指定作者被过滤
