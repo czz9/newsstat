@@ -3,7 +3,7 @@
 #use strict;
 #Writen by qxb@smth
 #Any advice,contact qxb@smth
-#$Id: welcome.pl,v 1.35 2005/03/03 12:10:42 czz Exp $
+#$Id$
 use Time::Local;
 
 ########################################Define some variables#######################
