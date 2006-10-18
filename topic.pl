@@ -1,9 +1,11 @@
 #!/usr/bin/perl -w
+# Copyright (c) 2006, Xiubin Qian
+# All rights reserved.
 #
-#use strict;
-#Writen by qxb@smth
-#Any advice,contact qxb@smth
-#$Id$
+# This program is to generate top 10 hot topics of cn.bbs.* in the last 24 hours from
+# ovdb of innd.   Blacklists for word and author are also supported.
+# $Id$
+
 use Time::Local;
 
 ########################################Define some variables#######################
@@ -13,8 +15,6 @@ my %month;
 my $datDir      = "/usr/local/news/spool/overview/c/b/";
 my $destTopFile = "/usr/local/news/public_html/day";
 
-#my $invalid="badtitle.conf";
-#my @badtitles;
 my @datFiles;        #This is used to keep all the DAT files
 my $datfile;
 my $destFileName;    #This is used to keep all the DAT files
@@ -26,7 +26,7 @@ my $line;
 my $time;
 
 #add filter start
-my $filter = "filter.conf";
+my $filter = "blacklist";
 my %filter;
 
 &getFilter( $filter, \%filter );
@@ -96,10 +96,6 @@ foreach $datfile (@datFiles) {
             next
               if ( &indexof1( $tempname->{'title'}, $filter{'title'} ) != -1 );
         }
-
-        #
-
-        #		next if(&invalid(\@badtitles,$tempname->{'title'}));
 
         $index = &indexof( $tempname->{'title'}, \@final );
         $temp = quotemeta( $tempname->{'author'} );
@@ -401,20 +397,6 @@ sub getTime_ {
         $time->{'sec'}, $time->{'min'},   $time->{'hour'},
         $time->{'day'}, $time->{'month'}, $time->{'year'}
     );
-}
-
-sub invalid {
-    my $i;
-    my $title;
-
-    for ( $i = 0 ; $i < @{ $_[0] } ; $i++ ) {
-        $title = quotemeta( ${ $_[0] }[$i] );
-        if ( $_[1] =~ /^\s*$title\s*$/ ) {
-            return 1;
-        }
-    }
-
-    return 0;
 }
 
 sub getFilter {
