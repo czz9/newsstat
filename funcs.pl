@@ -1,3 +1,9 @@
+# Copyright (c) 2006, Xiubin Qian
+# All rights reserved.
+#
+# This program is to generate top 10 hot topics of cn.bbs.* in the last 24 hours from
+# ovdb of innd.   Blacklists for word and author are also supported.
+# $Id$
 use Time::Local;
 
 my $ovdb_command="ovdb_stat";
