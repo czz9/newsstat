@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/local/bin/perl  -w
 # Copyright (c) 2006, Xiubin Qian
 # All rights reserved.
 #
@@ -7,19 +7,22 @@
 # $Id$
 
 use Time::Local;
+require "funcs.pl";
+#use strict;
 
 ########################################Define some variables#######################
+my $destTopFile	= "day";
+my $news_group	= "cnnews.list"; #This file keeps the news groups' name
+my $ovdb_comm	= "ovdb_stat";
+######################################End Define some variables#####################
 my ( $year, $month, $day );
+my  ( $hour );
 my ( $timemin, $timemax );
-my %month;
-my $datDir      = "/usr/local/news/spool/overview/c/b/";
-my $destTopFile = "/usr/local/news/public_html/day";
 
-my @datFiles;        #This is used to keep all the DAT files
-my $datfile;
-my $destFileName;    #This is used to keep all the DAT files
-my @final;           #This is used to keep all the record
+my @newsGroups;        #This is used to keep all the DAT files
+
 my @total;
+my @final;
 my $index;
 my $i;
 my $line;
@@ -45,62 +48,56 @@ if ( @ARGV == 0 ) {
       ( $time[2], $time[3], $time[4] + 1, $time[5] + 1900 );    #(10,1,2002)
     $time    = timelocal( 0, 0, $hour, $day, $month - 1, $year );  #00:00:00  10
     $timemin = $time - 8 * 3600 - 86400;                           #16:00:00  9
+#    $timemin = $time - 8 * 3600 - 25*86400;                           #16:00:00  9
     $timemax = $time - 8 * 3600;                                   #16;00:00 10
 }
 
-#$time=timelocal(0,0,0,12,11,2001);  #00:00:00  10
-#$timemin=$time-8*3600-86400;	#16:00:00  9
-#$timemax=$time-8*3600; #16;00:00 10
-
-#end check argu
-#define the date
-%month = (
-    "1", "Jan", "2",  "Feb", "3",  "Mar", "4",  "Apr",
-    "5", "May", "6",  "Jun", "7",  "Jul", "8",  "Aug",
-    "9", "Sep", "10", "Oct", "11", "Nov", "12", "Dec"
-);
-
-#$day="$day" if(length($day) == 1);
-#$dateString="$day $month{$month} $year";
-#end define
 ###############################end deal with date arguments ########################
 #
-###############################Begin deal with the data file #######################
-@datFiles = `find $datDir -name "cn.bbs.*.dat" -o -name "cn.bbs.*.DAT"`;
-chomp(@datFiles);
-foreach $datfile (@datFiles) {
-    if ( $datfile =~ /^.*\/(.*)\.[dD][aA][tT]$/i ) {
-        $destFileName = $1;
-    }
+###############################         Get news groups      #######################
+open (NEWSGROUPS,"$news_group") or die "News Groups Data file $news_group open failed!\n";
+while(<NEWSGROUPS>){
+	next if(/^#/);
+        next if(/^$/);
+        next if(/^[^cn]/);
+	my $tempname=$_;
+	chomp($tempname);
+	push(@newsGroups,$tempname);
+}
+close(NEWSGROUPS);
 
-    open( FILE, $datfile ) or die "Cant find file $datfile,Please check it!\n";
+###############################      End Get news groups     #######################
 
+foreach $group_name (@newsGroups) {
+
+	my $record={};
+	&getBeginEndNum($group_name,0,0,$record);
+
+    open( RECO, "$ovdb_comm -r $record->{'low'}-$record->{'high'} $record->{'groupName'} |") ;
     #code for read record and compare it with the fianl data
-    while ( $line = <FILE> ) {    #Read the DAT file line by line
+    while ( $line = <RECO> ) {    #Read the DAT file line by line
         my $tempname = {};
         chomp($line);
         $time = &getTime($line);
         next if ( ( $time < $timemin ) or ( $time > $timemax ) );
 
-        #		next if($line!~/$dateString/);#read next if the date dont match
-
         &getInfo( $line, $tempname );
-
-        #
+	
         if ( defined( @{ $filter{'titleFilter'} } ) ) {
-            next
-              if ( &indexof0( $tempname->{'title'}, $filter{'titleFilter'} ) !=
-                -1 );
+            next if ( &indexof0( $tempname->{'title'}, $filter{'titleFilter'} ) != -1 );
         }
         if ( defined( @{ $filter{'title'} } ) ) {
-            next
-              if ( &indexof1( $tempname->{'title'}, $filter{'title'} ) != -1 );
+            next if ( &indexof1( $tempname->{'title'}, $filter{'title'} ) != -1 );
         }
 
+	##read here 2006.10.24
         $index = &indexof( $tempname->{'title'}, \@final );
-        $temp = quotemeta( $tempname->{'author'} );
+	#Èç¹û¸Ã±êÌâÒÑ¾­±»±£´æ£¬Ôò·µ»ØÎ»ÖÃ£¬·ñÔò·µ»Ø-1
+	 
+        my $temp = quotemeta( $tempname->{'author'} );
         if ( $index == -1 ) {
-            $tempname->{'group'}      = $destFileName;
+            $tempname->{'group'}      = $record->{'groupName'};
+	    #$tempname->{'group'}      = $destFileName;
             $tempname->{'froms'}->[0] = $tempname->{from};
             $tempname->{'fromNum'}    = 1;
             push ( @final, $tempname );
@@ -118,8 +115,7 @@ foreach $datfile (@datFiles) {
             }
         }
     }
-    close(FILE);
-
+    close(RECO);
     #output this group's data into a file named by the group name
     @total = ( @total, @final );
     undef(@final);
@@ -127,13 +123,11 @@ foreach $datfile (@datFiles) {
     #end output
 
 }
-
 #add 8 hours
 foreach (@total) {
     $_->{'date'} = &add8hours( $_->{'date'} );
-}
 
-#
+}
 
 #&sort(\@total);
 
@@ -145,7 +139,6 @@ my @temp = sort {
         and ( $b->{'secs'} == $a->{'secs'} )
         and ( $b->{'group'} cmp $a->{'group'} ) )
 } @total;
-
 my @last;
 &sort2( \@temp, \@last );
 
@@ -168,31 +161,11 @@ sub sort2 {
     push ( @{ $_[1] }, @array );
 }
 
-sub getInfo {
-    my @info = split ( /\t/, $_[0] );
-
-    ( ( $info[1] =~ /^Re:\s(.*)$/ ) and $_[1]->{'title'} = $1 )
-      or $_[1]->{'title'} = $info[1];
-    ( ( $info[2] =~ /^\s*(.*)\s+\(.*$/ ) and $_[1]->{'author'} = $1 )
-      or $_[1]->{'author'} = $info[2];
-    $_[1]->{'authorN'}     = $info[2];
-    $_[1]->{'otherAuthor'} = $_[1]->{'author'};
-    if ( $info[3] =~ /^\s*(\w+,)?\s*(.*?\d\d:\d\d:\d\d)\s+.*$/ ) {
-        $_[1]->{'date'} = $2;
-        $_[1]->{'secs'} = &getTime_($2);
-    }
-    $_[1]->{'id'} = $info[4];
-    ( $info[4] =~ /.*?@(.*)>$/ ) and $_[1]->{'from'} = $1;
-    $_[1]->{'nums'} = 1;
-
-    return 1;
-}
-
 sub indexof {
     my $i;
 
     for ( $i = 0 ; $i < @{ $_[1] } ; $i++ ) {
-        $title_ = quotemeta( ${ $_[1][$i] }{'title'} );
+        my $title_ = quotemeta( ${ $_[1][$i] }{'title'} );
         return $i if ( $_[0] =~ /^(Re:\s)?$title_/ );
     }
     return -1;
@@ -202,7 +175,7 @@ sub indexof0 {
     my $i;
 
     for ( $i = 0 ; $i < @{ $_[1] } ; $i++ ) {
-        $title_ = quotemeta( $_[1][$i] );
+        my $title_ = quotemeta( $_[1][$i] );
         return $i if ( $_[0] =~ /$title_/ );
     }
     return -1;
@@ -212,7 +185,7 @@ sub indexof1 {
     my $i;
 
     for ( $i = 0 ; $i < @{ $_[1] } ; $i++ ) {
-        $title_ = quotemeta( $_[1][$i] );
+        my $title_ = quotemeta( $_[1][$i] );
         return $i if ( $_[0] =~ /^\s*$title_\s*$/ );
     }
     return -1;
@@ -259,7 +232,7 @@ sub topn {
     my @array  = @{$rarray};
     my $i;
     my $now    = localtime( time() );
-    my $footer = "¡ùProgrammed by qxb<qianxb\@tsinghua.org.cn> 2002/01/16";
+    my $footer = "¡ùProgrammed by qxb<qianxb\@tsinghua.org.cn> 2002/01/16, Modified on 2006/10/24";
 
     format FORMATHEADER =
                 [1;34m-----[37m===== [31mÈ«[33m¹ú[35mÊ®[34m´ó[32mÈÈ[36mÃÅ[33m»°[31mÌâ [37m=====[34m-----[0m
@@ -313,90 +286,6 @@ sub topn {
     close(FILE2);
     select(STDOUT);
     return 1;
-}
-
-sub getTime {
-    my $line  = shift;
-    my $time  = {};
-    my %month = (
-        "Jan", 0, "Feb", 1, "Mar", 2, "Apr", 3, "May", 4,  "Jun", 5,
-        "Jul", 6, "Aug", 7, "Sep", 8, "Oct", 9, "Nov", 10, "Dec", 11
-    );
-    my @info = split ( /\t/, $line );
-
-    if ( $info[3] =~ /^\s*(\w+,)?\s*(.*?\d\d:\d\d:\d\d)\s+.*$/ ) {
-        $info[3] = $2;
-    }
-    (
-        $time->{'day'},  $time->{'month'}, $time->{'year'},
-        $time->{'time'}, $time->{'temp'}
-      )
-      = split ( /\s+/, $info[3] );
-    ( $time->{'hour'}, $time->{'min'}, $time->{'sec'} ) =
-      split ( /:/, $time->{'time'} );
-    $time->{'month'} = $month{ $time->{'month'} };
-    return timelocal(
-        $time->{'sec'}, $time->{'min'},   $time->{'hour'},
-        $time->{'day'}, $time->{'month'}, $time->{'year'}
-    );
-}
-
-sub add8hours {
-    my $line = shift;
-    my $time = {};
-    my $seconds;
-    my %month = (
-        "Jan", 0, "Feb", 1, "Mar", 2, "Apr", 3, "May", 4,  "Jun", 5,
-        "Jul", 6, "Aug", 7, "Sep", 8, "Oct", 9, "Nov", 10, "Dec", 11
-    );
-    my %month1 = (
-        "0", "Jan", "1", "Feb", "2",  "Mar", "3",  "Apr",
-        "4", "May", "5", "Jun", "6",  "Jul", "7",  "Aug",
-        "8", "Sep", "9", "Oct", "10", "Nov", "11", "Dec"
-    );
-    ( $time->{'day'}, $time->{'month'}, $time->{'year'}, $time->{'time'} ) =
-      split ( /\s+/, $line );
-    ( $time->{'hour'}, $time->{'min'}, $time->{'sec'} ) =
-      split ( /:/, $time->{'time'} );
-    $time->{'month'} = $month{ $time->{'month'} };
-    $seconds = timelocal(
-        $time->{'sec'}, $time->{'min'},   $time->{'hour'},
-        $time->{'day'}, $time->{'month'}, $time->{'year'}
-    );
-    $seconds += 8 * 3600;
-    (
-        $time->{'sec'},   $time->{'min'},  $time->{'hour'}, $time->{'day'},
-        $time->{'month'}, $time->{'year'}, $time->{'temp'}
-      )
-      = localtime($seconds);
-    $time->{'min'}  = "0$time->{'min'}"  if ( length( $time->{'min'} ) == 1 );
-    $time->{'hour'} = "0$time->{'hour'}" if ( length( $time->{'hour'} ) == 1 );
-    $time->{'sec'}  = "0$time->{'sec'}"  if ( length( $time->{'sec'} ) == 1 );
-    $time->{'year'} += 1900;
-    $time->{'month'} = $month1{ $time->{'month'} };
-    return
-"$time->{'day'} $time->{'month'} $time->{'year'} $time->{'hour'}:$time->{'min'}:$time->{'sec'}";
-}
-
-sub getTime_ {
-    my $line  = shift;
-    my $time  = {};
-    my %month = (
-        "Jan", 0, "Feb", 1, "Mar", 2, "Apr", 3, "May", 4,  "Jun", 5,
-        "Jul", 6, "Aug", 7, "Sep", 8, "Oct", 9, "Nov", 10, "Dec", 11
-    );
-    (
-        $time->{'day'},  $time->{'month'}, $time->{'year'},
-        $time->{'time'}, $time->{'temp'}
-      )
-      = split ( /\s+/, $line );
-    ( $time->{'hour'}, $time->{'min'}, $time->{'sec'} ) =
-      split ( /:/, $time->{'time'} );
-    $time->{'month'} = $month{ $time->{'month'} };
-    return timelocal(
-        $time->{'sec'}, $time->{'min'},   $time->{'hour'},
-        $time->{'day'}, $time->{'month'}, $time->{'year'}
-    );
 }
 
 sub getFilter {
