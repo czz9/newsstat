@@ -11,7 +11,7 @@ require "funcs.pl";
 #use strict;
 
 ########################################Define some variables#######################
-my $destTopFile	= "day";
+my $destTopFile	= "/usr/local/news/public_html/day";
 my $news_group	= "/usr/local/news/db/active"; #This file keeps the news groups' name
 my $ovdb_comm	= "ovdb_stat";
 ######################################End Define some variables#####################
@@ -60,7 +60,7 @@ while(<NEWSGROUPS>){
 	next if(/^#/);
         next if(/^$/);
         next if(/^[^cn]/);
-	if(/^(cn.*?)\s+/){
+	if(/^(cn.bbs.*?)\s+/){
 		my $tempname=$1;
 		chomp($tempname);
 		push(@newsGroups,$tempname);
