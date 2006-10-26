@@ -12,7 +12,7 @@ require "funcs.pl";
 
 ########################################Define some variables#######################
 my $destTopFile	= "day";
-my $news_group	= "cnnews.list"; #This file keeps the news groups' name
+my $news_group	= "/usr/local/news/db/active"; #This file keeps the news groups' name
 my $ovdb_comm	= "ovdb_stat";
 ######################################End Define some variables#####################
 my ( $year, $month, $day );
@@ -60,9 +60,11 @@ while(<NEWSGROUPS>){
 	next if(/^#/);
         next if(/^$/);
         next if(/^[^cn]/);
-	my $tempname=$_;
-	chomp($tempname);
-	push(@newsGroups,$tempname);
+	if(/^(cn.*?)\s+/){
+		my $tempname=$1;
+		chomp($tempname);
+		push(@newsGroups,$tempname);
+	}
 }
 close(NEWSGROUPS);
 
