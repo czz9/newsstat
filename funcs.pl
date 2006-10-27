@@ -4,6 +4,7 @@
 # This program is to generate top 10 hot topics of cn.bbs.* in the last 24 hours from
 # ovdb of innd.   Blacklists for word and author are also supported.
 # $Id$
+
 use Time::Local;
 
 my $ovdb_command="ovdb_stat";
@@ -134,6 +135,164 @@ sub getTime_ {
         $time->{'sec'}, $time->{'min'},   $time->{'hour'},
         $time->{'day'}, $time->{'month'}, $time->{'year'}
     );
+}
+
+sub sort2 {
+    my @array;
+    my $i;
+    my $j;
+
+    for ( $i = 0 ; $i < @{ $_[0] } ; $i++ ) {
+        if ( $_[0][$i]->{'fromNum'} >= 2 ) {
+            push ( @{ $_[1] }, $_[0][$i] );
+        }
+        else {
+            push ( @array, $_[0][$i] );
+        }
+    }
+
+    push ( @{ $_[1] }, @array );
+}
+
+sub indexof {
+    my $i;
+
+    for ( $i = 0 ; $i < @{ $_[1] } ; $i++ ) {
+        my $title_ = quotemeta( ${ $_[1][$i] }{'title'} );
+        return $i if ( $_[0] =~ /^(Re:\s)?$title_/ );
+    }
+    return -1;
+}
+
+sub indexof0 {
+    my $i;
+
+    for ( $i = 0 ; $i < @{ $_[1] } ; $i++ ) {
+        my $title_ = quotemeta( $_[1][$i] );
+        return $i if ( $_[0] =~ /$title_/ );
+    }
+    return -1;
+}
+
+sub indexof1 {
+    my $i;
+
+    for ( $i = 0 ; $i < @{ $_[1] } ; $i++ ) {
+        my $title_ = quotemeta( $_[1][$i] );
+        return $i if ( $_[0] =~ /^\s*$title_\s*$/ );
+    }
+    return -1;
+}
+
+sub sort {
+    my $rarray = shift;
+    my @array  = @$rarray;
+    my $i;
+    my $j;
+    my %rhash;
+
+    for ( $i = 0 ; $i < @array - 1 ; $i++ ) {
+        for ( $j = $i + 1 ; $j < @array ; $j++ ) {
+            if ( $array[$i]->{'nums'} < $array[$j]->{'nums'} ) {
+                %rhash = %{ $array[$i] };
+                %{ $array[$i] } = %{ $array[$j] };
+                %{ $array[$j] } = %rhash;
+            }
+            elsif ( ( $array[$i]->{'nums'} == $array[$j]->{'nums'} )
+                and ( $array[$i]->{'secs'} < $array[$j]->{'secs'} ) )
+            {
+                %rhash = %{ $array[$i] };
+                %{ $array[$i] } = %{ $array[$j] };
+                %{ $array[$j] } = %rhash;
+            }
+            elsif ( ( $array[$i]->{'nums'} == $array[$j]->{'nums'} )
+                and ( $array[$i]->{'secs'} == $array[$j]->{'secs'} )
+                and ( $array[$i]->{'group'} lt $array[$j]->{'group'} ) )
+            {
+                %rhash = %{ $array[$i] };
+                %{ $array[$i] } = %{ $array[$j] };
+                %{ $array[$j] } = %rhash;
+
+            }
+        }
+    }
+}
+
+sub topn {
+    my $num    = shift;
+    my $rarray = shift;
+    my $file   = shift;
+    my @array  = @{$rarray};
+    my $i;
+    my $now    = localtime( time() );
+    my $footer = "¡ùProgrammed by qxb<qianxb\@tsinghua.org.cn> 2002/01/16, Modified on 2006/10/24";
+
+    format FORMATHEADER =
+                [1;34m-----[37m===== [31mÈ«[33m¹ú[35mÊ®[34m´ó[32mÈÈ[36mÃÅ[33m»°[31mÌâ [37m=====[34m-----[0m
+.
+    format FORMATHEADER1 =
+                        [4mhttp://www.cn-bbs.org/[0m
+.
+
+    format FORMATLINE1 =
+[1;37mµÚ[33m@## [37mÃû ÐÅÇø : [35m@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<[32m@<<<<<<<<<<<<<<<<<<<<<<<<<<[0m
+	$i+1,$array[$i]->{'group'},$array[$i]->{'author'}
+.
+    format FORMATLINE2 =
+[1;44m  @>>ÈË¡ú±êÌâ : @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<[0m
+	  $array[$i]->{'nums'},$array[$i]->{'title'}
+.
+    format FORMATLINE3 =
+     ×÷Õß : @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	  $array[$i]->{'authorN'}
+.
+    format FORMATLINE4 =
+     ÈËÊý : @<<<<
+	  $array[$i]->{'nums'}
+
+.
+    format FORMATFOOT =
+                      (@<<<<<<<<<<<<<<<<<<<<<<<)
+	      $now
+.
+
+    open( FILE2, ">$file" ) or die "Cant *write* file $file,Please check it!\n";
+    select(FILE2);
+    $~ = "FORMATHEADER";
+    write;
+    $~ = "FORMATHEADER1";
+    write;
+    for ( $i = 0 ; $i < $num ; $i++ ) {
+
+        $~ = "FORMATLINE1";
+        write;
+        $~ = "FORMATLINE2";
+        write;
+
+        #		$~="FORMATLINE3";
+        #		write;
+        #		$~="FORMATLINE4";
+        #		write;
+    }
+    $~ = FORMATFOOT;
+    write;
+    close(FILE2);
+    select(STDOUT);
+    return 1;
+}
+
+sub getFilter {
+
+    #&getFilter($confile,\%filters)
+    open( FILTER, $_[0] ) or die "Cant find file $_[0],Please check it!\n";
+    while (<FILTER>) {
+        next if (/^\s*#/);
+        my ( $key, $values ) = split (/=/);
+        next if ( !defined($values) );
+        my @value = split ( /\s+/, $values );
+        $_[1]->{$key} = \@value;
+    }
+    close(FILTER);
 }
 
 1;
