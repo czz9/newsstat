@@ -11,7 +11,7 @@ my $ovdb_command="ovdb_stat";
 
 sub getBeginEndNum{
 	#&getBeginEndNum($newsgroup,$timebegin,$timeend,\%record);
-	open(OVDB,"$ovdb_command -g $_[0] |") or die "Excute command failed!\n";
+	open(OVDB,"$ovdb_command -c $_[0] |") or die "Excute command failed!\n";
 	while(<OVDB>){
 		if(/.*groupstats:\s*low:\s*(\d+).*high:\s*(\d+).*count:\s+(\d+)/){
 			$_[3]->{'groupName'}=$_[0];
