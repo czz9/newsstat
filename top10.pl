@@ -119,6 +119,11 @@ foreach $group_name (@newsGroups) {
                 push ( @{ $final[$index]->{froms} }, $final[$index]->{from} );
                 $final[$index]->{fromNum}++;
             }
+
+	    if($tempname->{'secs'} > $final[$index]->{'secs'} ){
+		    $final[$index]->{'from'}=$tempname->{'from'};
+		    $final[$index]->{'secs'}=$tempname->{'secs'};
+	    }
         }
     }
     close(RECO);
@@ -146,7 +151,8 @@ my @temp = sort {
         and ( $b->{'group'} cmp $a->{'group'} ) )
 } @total;
 my @last;
-&sort2( \@temp, \@last );
+#&sort2( \@temp, \@last );
+@last=@temp;
 
 &topn( 10, \@last, $destTopFile );
 

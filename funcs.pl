@@ -184,40 +184,6 @@ sub indexof1 {
     return -1;
 }
 
-sub sort {
-    my $rarray = shift;
-    my @array  = @$rarray;
-    my $i;
-    my $j;
-    my %rhash;
-
-    for ( $i = 0 ; $i < @array - 1 ; $i++ ) {
-        for ( $j = $i + 1 ; $j < @array ; $j++ ) {
-            if ( $array[$i]->{'nums'} < $array[$j]->{'nums'} ) {
-                %rhash = %{ $array[$i] };
-                %{ $array[$i] } = %{ $array[$j] };
-                %{ $array[$j] } = %rhash;
-            }
-            elsif ( ( $array[$i]->{'nums'} == $array[$j]->{'nums'} )
-                and ( $array[$i]->{'secs'} < $array[$j]->{'secs'} ) )
-            {
-                %rhash = %{ $array[$i] };
-                %{ $array[$i] } = %{ $array[$j] };
-                %{ $array[$j] } = %rhash;
-            }
-            elsif ( ( $array[$i]->{'nums'} == $array[$j]->{'nums'} )
-                and ( $array[$i]->{'secs'} == $array[$j]->{'secs'} )
-                and ( $array[$i]->{'group'} lt $array[$j]->{'group'} ) )
-            {
-                %rhash = %{ $array[$i] };
-                %{ $array[$i] } = %{ $array[$j] };
-                %{ $array[$j] } = %rhash;
-
-            }
-        }
-    }
-}
-
 sub topn {
     my $num    = shift;
     my $rarray = shift;
