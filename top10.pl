@@ -120,7 +120,7 @@ foreach $group_name (@newsGroups) {
                 $final[$index]->{fromNum}++;
             }
 
-	    if($tempname->{'secs'} > $final[$index]->{'secs'} ){
+	    if($tempname->{'secs'} < $final[$index]->{'secs'} ){
 		    $final[$index]->{'from'}=$tempname->{'from'};
 		    $final[$index]->{'secs'}=$tempname->{'secs'};
 	    }
