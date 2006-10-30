@@ -145,10 +145,10 @@ foreach (@total) {
 my @temp = sort {
     ( $b->{'nums'} <=> $a->{'nums'} )
       or
-      ( ( $b->{'nums'} == $a->{'nums'} ) and ( $b->{'secs'} <=> $a->{'secs'} ) )
+      ( ( $b->{'nums'} == $a->{'nums'} ) and ( $b->{'group'} cmp $a->{'group'} ) )
       or (  ( $b->{'nums'} == $a->{'nums'} )
-        and ( $b->{'secs'} == $a->{'secs'} )
-        and ( $b->{'group'} cmp $a->{'group'} ) )
+        and ( $b->{'group'} eq $a->{'group'} ) 
+        and ( $b->{'secs'} == $a->{'secs'} ) )
 } @total;
 my @last;
 #&sort2( \@temp, \@last );
