@@ -261,4 +261,14 @@ sub getFilter {
     close(FILTER);
 }
 
+sub usage {
+    print "本脚本是为cn.bbs.*数据统计所开发。用于统计各个新闻组的访问情况。\n";
+    print "Usage:\n";
+    print "\t$0\n";
+    print "\t$0 -c [post|id|site] -t [day|week|month|year] -d day\n";
+    return 1;
+
+}
+
 1;
+
