@@ -46,7 +46,7 @@ if ( @ARGV == 0 ) {
     my @time = localtime($time);    #01:00:00 10
     ( $hour, $day, $month, $year ) =
       ( $time[2], $time[3], $time[4] + 1, $time[5] + 1900 );    #(10,1,2002)
-    $time    = timelocal( 0, 0, 0, $day, $month - 1, $year );  #00:00:00  10
+    $time    = timelocal( 0, 0, $hour, $day, $month - 1, $year );  #00:00:00  10
     $timemin = $time - 86400;                           #16:00:00  9
 #$timemin = $time - 8 * 3600 - 86400;                           #16:00:00  9
 #    $timemin = $time - 8 * 3600 - 25*86400;                           #16:00:00  9
