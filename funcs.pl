@@ -138,20 +138,28 @@ sub getTime_ {
 }
 
 sub sort2 {
+#&sort2(\@dest,\@source,$num);
     my @array;
+    my %froms;
+    my $tempfrom;
     my $i;
     my $j;
 
-    for ( $i = 0 ; $i < @{ $_[0] } ; $i++ ) {
-        if ( $_[0][$i]->{'fromNum'} >= 2 ) {
-            push ( @{ $_[1] }, $_[0][$i] );
-        }
-        else {
-            push ( @array, $_[0][$i] );
+    for ( $i = 0 ; $i < @{ $_[1] } ; $i++ ) {
+
+	$tempfrom=${$_[1][$i]}{'group'};
+
+        if ( grep( /^$tempfrom$/, keys(%froms) ) ) {
+	    if($froms{$tempfrom} < $_[2]){
+	        push ( @{ $_[0] }, $_[1][$i] );
+		$froms{$tempfrom}++;
+	    }
+        }else {
+            push ( @{ $_[0] }, $_[1][$i] );
+    	    $froms{$tempfrom}++;
         }
     }
 
-    push ( @{ $_[1] }, @array );
 }
 
 sub indexof {
