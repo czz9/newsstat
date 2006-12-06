@@ -13,7 +13,8 @@ sub getBeginEndNum{
 	#&getBeginEndNum($newsgroup,$timebegin,$timeend,\%record);
 	open(OVDB,"$ovdb_command -c $_[0] |") or die "Excute command failed!\n";
 	while(<OVDB>){
-		if(/.*counted:\s*low:\s*(\d+).*high:\s*(\d+).*count:\s+(\d+)/){
+		if(/.*low:\s*(\d+).*high:\s*(\d+).*count:\s+(\d+)/){
+			#if(/.*counted:\s*low:\s*(\d+).*high:\s*(\d+).*count:\s+(\d+)/){
 			$_[3]->{'groupName'}=$_[0];
 			$_[3]->{'low'}=($1>$2)?$2:$1;
 			$_[3]->{'high'}=$2;
@@ -273,10 +274,226 @@ sub usage {
     print "本脚本是为cn.bbs.*数据统计所开发。用于统计各个新闻组的访问情况。\n";
     print "Usage:\n";
     print "\t$0\n";
-    print "\t$0 -c [post|id|site] -t [day|week|month|year] -d day\n";
-    return 1;
+    print "\t$0 -t [day|week|month|year]\n";
+    exit;
+#    return 1;
 
 }
+
+sub topn_topic{
+#&topn_topic($type, 10, \@last, $destTopFile_day_id );
+	my $type_;
+	my $type=shift;
+	my $num=shift;
+	my $rarray=shift;
+	my $file=shift;
+	my @array=@{$rarray};
+	if($type=~/day/){
+		$type_="昨日";
+	}elsif($type=~/week/){
+		$type_="上周";
+	}elsif($type=~/month/){
+		$type_="上月";
+	}elsif($type=~/year/){
+		$type_="上年度";
+	}else{
+		$type_="";
+	}
+	my $i;
+	my $footer="※Programmed by qxb<qianxb\@tsinghua.org.cn> 2002/01/10,Modified on 2006/11/01";
+
+	format FORMATHEADER_TOPIC =
+
+                -----=====@<<百大热门话题(篇数排名)=====-----
+		$type_
+.
+	format FORMATLINE_TOPIC_1 =
+第@### 名 信区 : @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<【@>>>>>>>>>>>>>>>>>>>】
+	$i+1,$array[$i]->{'group'},$array[$i]->{'date'}
+.
+	format FORMATLINE_TOPIC_2 =
+     标题 : @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	  $array[$i]->{'title'}
+.
+	format FORMATLINE_TOPIC_3 =
+     作者 : @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	  $array[$i]->{'author'}
+.
+	format FORMATLINE_TOPIC_4 =
+     篇数 : @<<<<
+	  $array[$i]->{'nums_post'}
+
+.
+	format FORMATFOOT_TOPIC =
+#------------------------------------------------------------------------------
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	  $footer
+.
+	
+	open(FILE2,">$file") or die "Cant find file $file,Please check it!\n";
+	select(FILE2);
+	$~="FORMATHEADER_TOPIC";
+	write;
+	for($i=0;$i<$num;$i++){
+
+		$~="FORMATLINE_TOPIC_1";
+		write;
+		$~="FORMATLINE_TOPIC_2";
+		write;
+		$~="FORMATLINE_TOPIC_3";
+		write;
+		$~="FORMATLINE_TOPIC_4";
+		write;
+	}
+	$~=FORMATFOOT_TOPIC;
+	write;
+	close(FILE2);
+	select(STDOUT);
+	return 1;
+}
+sub topn_id{
+#&topn_id($type, 10, \@last, $destTopFile_day_id );
+	my $type_;
+	my $type=shift;
+	my $num=shift;
+	my $rarray=shift;
+	my $file=shift;
+	my @array=@{$rarray};
+	if($type=~/day/){
+		$type_="昨日";
+	}elsif($type=~/week/){
+		$type_="上周";
+	}elsif($type=~/month/){
+		$type_="上月";
+	}elsif($type=~/year/){
+		$type_="上年度";
+	}else{
+		$type_="";
+	}
+	my $i;
+	my $footer="※Programmed by qxb<qianxb\@tsinghua.org.cn> 2002/01/10,Modified on 2006/11/01";
+
+	format FORMATHEADER_ID =
+
+                -----=====本@<百大热门话题(ID数排名)=====-----
+		$type_
+.
+	format FORMATLINE_ID_1 =
+第@### 名 信区 : @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<【@>>>>>>>>>>>>>>>>>>>】
+	$i+1,$array[$i]->{'group'},$array[$i]->{'date'}
+.
+	format FORMATLINE_ID_2 =
+     标题 : @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	  $array[$i]->{'title'}
+.
+	format FORMATLINE_ID_3 =
+     作者 : @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	  $array[$i]->{'author'}
+.
+	format FORMATLINE_ID_4 =
+     人数 : @<<<<
+	  $array[$i]->{'nums_id'}
+
+.
+	format FORMATFOOT_ID =
+#------------------------------------------------------------------------------
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	  $footer
+.
+	
+	open(FILE2,">$file") or die "Cant find file $file,Please check it!\n";
+	select(FILE2);
+	$~="FORMATHEADER_ID";
+	write;
+	for($i=0;$i<$num;$i++){
+
+		$~="FORMATLINE_ID_1";
+		write;
+		$~="FORMATLINE_ID_2";
+		write;
+		$~="FORMATLINE_ID_3";
+		write;
+		$~="FORMATLINE_ID_4";
+		write;
+	}
+	$~=FORMATFOOT_ID;
+	write;
+	close(FILE2);
+	select(STDOUT);
+	return 1;
+}
+sub topn_site{
+#&topn_site($type, 10, \@last, $destTopFile_day_id );
+	my $type_;
+	my $type=shift;
+	my $num=shift;
+	my $rarray=shift;
+	my $file=shift;
+	my @array=@{$rarray};
+	if($type=~/day/){
+		$type_="昨日";
+	}elsif($type=~/week/){
+		$type_="上周";
+	}elsif($type=~/month/){
+		$type_="上月";
+	}elsif($type=~/year/){
+		$type_="上年度";
+	}else{
+		$type_="";
+	}
+	my $i;
+	my $footer="※Programmed by qxb<qianxb\@tsinghua.org.cn> 2002/01/10,Modified on 2006/11/01";
+
+	format FORMATHEADER_SITE =
+
+                -----=====本@<百大热门话题(站数排名)=====-----
+		$type_
+.
+	format FORMATLINE_SITE_1 =
+第@### 名 信区 : @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<【@>>>>>>>>>>>>>>>>>>>】
+	$i+1,$array[$i]->{'group'},$array[$i]->{'date'}
+.
+	format FORMATLINE_SITE_2 =
+     标题 : @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	  $array[$i]->{'title'}
+.
+	format FORMATLINE_SITE_3 =
+     作者 : @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	  $array[$i]->{'author'}
+.
+	format FORMATLINE_SITE_4 =
+     站数 : @<<<<
+	  $array[$i]->{'nums_site'}
+
+.
+	format FORMATFOOT_SITE =
+#------------------------------------------------------------------------------
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	  $footer
+.
+	
+	open(FILE2,">$file") or die "Cant find file $file,Please check it!\n";
+	select(FILE2);
+	$~="FORMATHEADER_SITE";
+	write;
+	for($i=0;$i<$num;$i++){
+
+		$~="FORMATLINE_SITE_1";
+		write;
+		$~="FORMATLINE_SITE_2";
+		write;
+		$~="FORMATLINE_SITE_3";
+		write;
+		$~="FORMATLINE_SITE_4";
+		write;
+	}
+	$~=FORMATFOOT_SITE;
+	write;
+	close(FILE2);
+	select(STDOUT);
+	return 1;
+}
+
 
 1;
 
