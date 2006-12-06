@@ -1,4 +1,4 @@
-#!/usr/bin/perl  
+#!/usr/local/bin/perl  
 # Copyright (c) 2006, Xiubin Qian
 # All rights reserved.
 #
