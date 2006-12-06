@@ -78,7 +78,7 @@ if($type =~/day/){
     ( $hour, $day, $month, $year ) =
       ( $time[2], $time[3], $time[4] + 1, $time[5] + 1900 );    #(10,1,2002)
     $timemin = timelocal( 0, 0, 0, 1, 0, $year-1 );  #00:00:00  10
-    $timemax = timelocal( 0, 0, 0, 1, 0, $year+1 );  #00:00:00  10
+    $timemax = timelocal( 0, 0, 0, 1, 0, $year );  #00:00:00  10
     #$timemax = timelocal( 0, 0, 0, 1, 0, $year );  #00:00:00  10
 }
 
