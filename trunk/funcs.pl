@@ -495,5 +495,177 @@ sub topn_site{
 }
 
 
+sub top_group_site{
+#&top_group_site($type, \@last_sort_by_topics, $destTopFile{$type}->[2] )
+#&topn_site($type, 10, \@last, $destTopFile_day_id );
+	my $type_;
+	my $type=shift;
+	my $rarray=shift;
+	my $file=shift;
+	my @array=@{$rarray};
+	if($type=~/day/){
+		$type_="昨日";
+	}elsif($type=~/week/){
+		$type_="上周";
+	}elsif($type=~/month/){
+		$type_="上月";
+	}elsif($type=~/year/){
+		$type_="上年度";
+	}else{
+		$type_="";
+	}
+	my $i;
+	my $footer="※Programmed by qxb<qianxb\@tsinghua.org.cn> 2006/12/07";
+
+	format FORMATHEADER_GROUP_SITE =
+
+                -----=====本@<新闻组活动情况排名(站数排名)=====-----
+		$type_
+.
+	format FORMATHEADER_GROUP_SITE_ =
+名次 组名                                       参与站数   文章数    参与用户数
+.
+	format FORMATLINE_GROUP_SITE_1 =
+@### @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<    @####   @#####       @######
+	$i+1,$array[$i]->{'name'},$array[$i]->{'site_num'},$array[$i]->{'post_num'},$array[$i]->{'id_num'}
+.
+	format FORMATFOOT_GROUP_SITE =
+#------------------------------------------------------------------------------
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	  $footer
+.
+	
+	open(FILE2,">$file") or die "Cant find file $file,Please check it!\n";
+	select(FILE2);
+	$~="FORMATHEADER_GROUP_SITE";
+	write;
+	$~="FORMATHEADER_GROUP_SITE_";
+	write;
+	for($i=0;$i<=$#array;$i++){
+
+		$~="FORMATLINE_GROUP_SITE_1";
+		write if($array[$i]->{'name'} ne '');
+	}
+	$~=FORMATFOOT_GROUP_SITE;
+	write;
+	close(FILE2);
+	select(STDOUT);
+	return 1;
+}
+
+
+sub top_group_post{
+#&top_group_post($type, \@last_sort_by_topics, $destTopFile{$type}->[2] )
+	my $type_;
+	my $type=shift;
+	my $rarray=shift;
+	my $file=shift;
+	my @array=@{$rarray};
+	if($type=~/day/){
+		$type_="昨日";
+	}elsif($type=~/week/){
+		$type_="上周";
+	}elsif($type=~/month/){
+		$type_="上月";
+	}elsif($type=~/year/){
+		$type_="上年度";
+	}else{
+		$type_="";
+	}
+	my $i;
+	my $footer="※Programmed by qxb<qianxb\@tsinghua.org.cn> 2006/12/07";
+
+	format FORMATHEADER_GROUP_POST =
+
+                -----=====本@<新闻组活动情况排名(文章数排名)=====-----
+		$type_
+.
+	format FORMATHEADER_GROUP_POST_ =
+名次 组名                                         文章数   参与站数    参与用户数
+.
+	format FORMATLINE_GROUP_POST_1 =
+@### @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<    @####     @#####       @######
+	$i+1,$array[$i]->{'name'},$array[$i]->{'post_num'},$array[$i]->{'site_num'},$array[$i]->{'id_num'}
+.
+	format FORMATFOOT_GROUP_POST =
+#------------------------------------------------------------------------------
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	  $footer
+.
+	
+	open(FILE2,">$file") or die "Cant find file $file,Please check it!\n";
+	select(FILE2);
+	$~="FORMATHEADER_GROUP_POST";
+	write;
+	$~="FORMATHEADER_GROUP_POST_";
+	write;
+	for($i=0;$i<=$#array;$i++){
+
+		$~="FORMATLINE_GROUP_POST_1";
+		write if($array[$i]->{'name'} ne '');
+	}
+	$~=FORMATFOOT_GROUP_POST;
+	write;
+	close(FILE2);
+	select(STDOUT);
+	return 1;
+}
+
+sub top_group_id{
+#&top_group_id($type, \@last_sort_by_ids, $destTopFile{$type}->[2] )
+	my $type_;
+	my $type=shift;
+	my $rarray=shift;
+	my $file=shift;
+	my @array=@{$rarray};
+	if($type=~/day/){
+		$type_="昨日";
+	}elsif($type=~/week/){
+		$type_="上周";
+	}elsif($type=~/month/){
+		$type_="上月";
+	}elsif($type=~/year/){
+		$type_="上年度";
+	}else{
+		$type_="";
+	}
+	my $i;
+	my $footer="※Programmed by qxb<qianxb\@tsinghua.org.cn> 2006/12/07";
+
+	format FORMATHEADER_GROUP_ID =
+
+                -----=====本@<新闻组活动情况排名(用户数排名)=====-----
+		$type_
+.
+	format FORMATHEADER_GROUP_ID_ =
+名次 组名                                         用户数   参与站数    文章数
+.
+	format FORMATLINE_GROUP_ID_1 =
+@### @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<    @####     @#####    @#####
+	$i+1,$array[$i]->{'name'},$array[$i]->{'id_num'},$array[$i]->{'site_num'},$array[$i]->{'post_num'}
+.
+	format FORMATFOOT_GROUP_ID =
+#------------------------------------------------------------------------------
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	  $footer
+.
+	
+	open(FILE2,">$file") or die "Cant find file $file,Please check it!\n";
+	select(FILE2);
+	$~="FORMATHEADER_GROUP_ID";
+	write;
+	$~="FORMATHEADER_GROUP_ID_";
+	write;
+	for($i=0;$i<=$#array;$i++){
+
+		$~="FORMATLINE_GROUP_ID_1";
+		write if($array[$i]->{'name'} ne '');
+	}
+	$~=FORMATFOOT_GROUP_ID;
+	write;
+	close(FILE2);
+	select(STDOUT);
+	return 1;
+}
 1;
 
