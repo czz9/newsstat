@@ -375,7 +375,7 @@ sub topn_id{
 
 	format FORMATHEADER_ID =
 
-                -----=====本@<百大热门话题(ID数排名)=====-----
+                -----=====@<<百大热门话题(ID数排名)=====-----
 		$type_
 .
 	format FORMATLINE_ID_1 =
@@ -446,7 +446,7 @@ sub topn_site{
 
 	format FORMATHEADER_SITE =
 
-                -----=====本@<百大热门话题(站数排名)=====-----
+                -----=====@<<百大热门话题(站数排名)=====-----
 		$type_
 .
 	format FORMATLINE_SITE_1 =
@@ -519,7 +519,7 @@ sub top_group_site{
 
 	format FORMATHEADER_GROUP_SITE =
 
-                -----=====本@<新闻组活动情况排名(站数排名)=====-----
+                -----=====@<<新闻组活动情况排名(站数排名)=====-----
 		$type_
 .
 	format FORMATHEADER_GROUP_SITE_ =
@@ -577,7 +577,7 @@ sub top_group_post{
 
 	format FORMATHEADER_GROUP_POST =
 
-                -----=====本@<新闻组活动情况排名(文章数排名)=====-----
+                -----=====@<<新闻组活动情况排名(文章数排名)=====-----
 		$type_
 .
 	format FORMATHEADER_GROUP_POST_ =
@@ -634,7 +634,7 @@ sub top_group_id{
 
 	format FORMATHEADER_GROUP_ID =
 
-                -----=====本@<新闻组活动情况排名(用户数排名)=====-----
+                -----=====@<<新闻组活动情况排名(用户数排名)=====-----
 		$type_
 .
 	format FORMATHEADER_GROUP_ID_ =
