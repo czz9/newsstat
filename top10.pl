@@ -151,7 +151,7 @@ my @temp = sort {
         and ( $b->{'secs'} == $a->{'secs'} ) )
 } @total;
 my @last;
-&sort2( \@last, \@temp,3 );
+&sort2( \@last, \@temp,2 );
 #@last=@temp;
 
 &topn( 10, \@last, $destTopFile );
